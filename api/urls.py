@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ItemViewSet, RegisterView, CustomAuthToken
+from .views import ItemViewSet, UserViewSet, RegisterView, CustomAuthToken
 
 router = DefaultRouter()
 router.register(r'items', ItemViewSet)

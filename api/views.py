@@ -23,6 +23,19 @@ class RegisterView(generics.CreateAPIView):
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
+        # We allow both username or email in the 'username' field
+        identifier = request.data.get('username')
+        password = request.data.get('password')
+
+        # Check if the identifier is an email
+        if '@' in identifier:
+            try:
+                user_obj = User.objects.get(email=identifier)
+                # If found, use the actual username for authentication
+                request.data['username'] = user_obj.username
+            except User.DoesNotExist:
+                pass # Let it fail normally in authentication if not found
+
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -31,7 +44,9 @@ class CustomAuthToken(ObtainAuthToken):
         return Response({
             'token': token.key,
             'user_id': user.pk,
-            'username': user.username
+            'username': user.username,
+            'email': user.email,
+            'is_staff': user.is_staff
         })
 
 class ItemViewSet(viewsets.ModelViewSet):
@@ -45,4 +60,4 @@ class ItemViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdminUser]
