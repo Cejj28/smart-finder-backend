@@ -27,3 +27,6 @@ gunicorn==22.0.0          # WSGI server for Render
 psycopg2-binary==2.9.10   # PostgreSQL adapter for Django
 dj-database-url==2.3.0    # Parses DATABASE_URL env var
 whitenoise==6.9.0         # Serves static files without a separate CDN
+cloudinary==1.36.0        # Cloudinary integration
+django-cloudinary-storage==0.3.0 # Django storage backend for Cloudinary
+
