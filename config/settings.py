@@ -178,6 +178,8 @@ else:
 # Fallback for older versions/libraries
 DEFAULT_FILE_STORAGE = STORAGES["default"]["BACKEND"]
 STATICFILES_STORAGE = STORAGES["staticfiles"]["BACKEND"]
+WHITENOISE_MANIFEST_STRICT = False
+
 
 CORS_ALLOW_ALL_ORIGINS = True
 
