@@ -5,4 +5,4 @@ from .models import Item
 class ItemAdmin(admin.ModelAdmin):
     list_display = ('type', 'item_name', 'location', 'reporter', 'created_at')
     list_filter = ('type', 'created_at')
-    search_fields = ('item_name', 'location', 'description')
+    search_fields = ('item_name', 'location', 'description') # 3 search fields 
