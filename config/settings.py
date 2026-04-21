@@ -145,7 +145,7 @@ USE_TZ = True
 
 # ── Storage Configuration ──────────────────────────────────────────────────────
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
