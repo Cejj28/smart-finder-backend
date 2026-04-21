@@ -1,11 +1,10 @@
-from whitenoise.storage import CompressedManifestStaticFilesStorage
+from whitenoise.storage import CompressedStaticFilesStorage
 import logging
 
 logger = logging.getLogger(__name__)
 
-class SafeWhiteNoiseStorage(CompressedManifestStaticFilesStorage):
-    # This disables the CSS regex parsing crash (MissingFileError)
-    manifest_strict = False
+class SafeWhiteNoiseStorage(CompressedStaticFilesStorage):
+
 
     def compress(self, original_file):
         """
