@@ -176,8 +176,9 @@ else:
         },
     }
 
-# Fallback for older libraries
+# Fallback for older libraries (cloudinary_storage reads STATICFILES_STORAGE directly)
 DEFAULT_FILE_STORAGE = STORAGES["default"]["BACKEND"]
+STATICFILES_STORAGE = STORAGES["staticfiles"]["BACKEND"]
 
 
 CORS_ALLOW_ALL_ORIGINS = True
