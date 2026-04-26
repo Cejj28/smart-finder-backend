@@ -74,11 +74,9 @@ class ItemViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
-        # Staff/admin can see all items; regular users only see Approved ones in the feed
-        if request.user.is_staff:
-            queryset = self.queryset
-        else:
-            queryset = self.queryset.filter(status='Approved')
+        # All mobile users (including admins) see only Approved items in the public feed
+        # Admins manage pending reports through the web admin panel
+        queryset = self.queryset.filter(status='Approved')
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
