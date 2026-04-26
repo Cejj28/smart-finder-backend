@@ -1,0 +1,47 @@
+=== Testing API Endpoints (Laboratory 8 Output) ===
+
+--- 1. Register User Endpoint ---
+> http POST http://127.0.0.1:8080/api/register/ username=lab8user password=testpassword123 email=lab8@example.com
+
+
+usage:
+    http [METHOD] URL [REQUEST_ITEM ...]
+
+error:
+    Request body (from stdin, --raw or a file) and request data (key=value) 
+cannot be mixed. Pass --ignore-stdin to let key/value take priority. See 
+https://httpie.io/docs#scripting for details.
+
+for more information:
+    run 'http --help' or visit https://httpie.io/docs/cli
+
+
+
+--- 2. Login User Endpoint ---
+> http POST http://127.0.0.1:8080/api/login/ username=lab8user password=testpassword123
+
+
+
+--- 3. Create Item Endpoint (POST) ---
+> http POST http://127.0.0.1:8080/api/items/ type=Lost item_name='Blue Backpack' location='Library 2nd Floor' description='Has a keychain' "Authorization: Token "
+
+
+usage:
+    http [METHOD] URL [REQUEST_ITEM ...]
+
+error:
+    Request body (from stdin, --raw or a file) and request data (key=value) 
+cannot be mixed. Pass --ignore-stdin to let key/value take priority. See 
+https://httpie.io/docs#scripting for details.
+
+for more information:
+    run 'http --help' or visit https://httpie.io/docs/cli
+
+
+
+--- 4. List Items Endpoint (GET) ---
+> http GET http://127.0.0.1:8080/api/items/ "Authorization: Token "
+
+
+
+

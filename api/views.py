@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth.models import User
 from .models import Item
-from .serializers import ItemSerializer, UserSerializer
+from .serializers import ItemSerializer, UserSerializer, StudentRegisterSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -20,6 +20,24 @@ class RegisterView(generics.CreateAPIView):
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
             "token": token.key
+        }, status=status.HTTP_201_CREATED)
+
+class StudentRegisterView(generics.CreateAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = StudentRegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'username': user.username,
+            'email': user.email,
+            'is_staff': user.is_staff,
+            'full_name': user.get_full_name(),
         }, status=status.HTTP_201_CREATED)
 
 class CustomAuthToken(ObtainAuthToken):
