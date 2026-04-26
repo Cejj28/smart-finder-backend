@@ -1,4 +1,5 @@
 from rest_framework import viewsets, generics, permissions, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -56,6 +57,24 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(reporter=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.reporter != request.user and not request.user.is_staff:
+            return Response({'error': 'You do not have permission to delete this item.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.reporter != request.user and not request.user.is_staff:
+            return Response({'error': 'You do not have permission to edit this item.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    @action(detail=False, methods=['get'])
+    def my_posts(self, request):
+        queryset = self.queryset.filter(reporter=request.user)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('id')
