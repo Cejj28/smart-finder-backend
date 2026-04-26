@@ -73,6 +73,15 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def list(self, request, *args, **kwargs):
+        # Staff/admin can see all items; regular users only see Approved ones in the feed
+        if request.user.is_staff:
+            queryset = self.queryset
+        else:
+            queryset = self.queryset.filter(status='Approved')
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def perform_create(self, serializer):
         serializer.save(reporter=self.request.user)
 
@@ -90,6 +99,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def my_posts(self, request):
+        # Always return ALL of the user's own posts regardless of status
         queryset = self.queryset.filter(reporter=request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
