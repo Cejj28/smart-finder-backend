@@ -33,6 +33,7 @@ class Item(models.Model):
     location = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     contact_info = models.CharField(max_length=255, blank=True, null=True)
+    category = models.CharField(max_length=100, blank=True, null=True)
     image = models.ImageField(upload_to='item_images/', blank=True, null=True)
     status = models.CharField(max_length=20, default='Pending Review')
     reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reported_items')

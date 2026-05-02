@@ -106,6 +106,29 @@ class ItemViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['get'])
+    def matches(self, request, pk=None):
+        """
+        Smart Match AI Logic:
+        Given an item, finds potential matches based on opposite type and same category.
+        """
+        item = self.get_object()
+        if not item.category:
+            return Response([]) # No matches if category is unknown
+
+        # Look for the opposite type
+        target_type = 'Found' if item.type == 'Lost' else 'Lost'
+
+        # Find items with the same category, opposite type, exclude the user's own items
+        # Optionally, we only match with 'Approved' or 'Pending' items
+        matches = Item.objects.filter(
+            type=target_type,
+            category=item.category
+        ).exclude(reporter=item.reporter).order_by('-created_at')[:5] # Return top 5 matches
+
+        serializer = self.get_serializer(matches, many=True)
+        return Response(serializer.data)
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
