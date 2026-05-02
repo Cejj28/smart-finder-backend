@@ -169,7 +169,7 @@ if os.environ.get('CLOUDINARY_URL'):
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
     print("INFO: Cloudinary URL found. Using Cloudinary for Media storage.")
