@@ -166,7 +166,7 @@ if os.environ.get('CLOUDINARY_URL'):
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage", # Removed 'Manifest'
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
     print("INFO: Cloudinary URL found. Using Cloudinary for Media storage.")
@@ -183,7 +183,7 @@ else:
 
 # Ensure your fallback variables match:
 DEFAULT_FILE_STORAGE = STORAGES["default"]["BACKEND"]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 
 CORS_ALLOW_ALL_ORIGINS = True
