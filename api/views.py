@@ -133,3 +133,24 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
+
+    def perform_create(self, serializer):
+        # Explicitly save is_staff from the request data
+        is_staff = self.request.data.get('is_staff', False)
+        user = serializer.save(is_staff=is_staff)
+        
+        # Update or create the profile to match the role
+        profile = user.profile
+        profile.role = 'admin' if is_staff else 'student'
+        profile.save()
+
+    def perform_update(self, serializer):
+        # Update is_staff and sync the profile role
+        is_staff = self.request.data.get('is_staff')
+        if is_staff is not None:
+            user = serializer.save(is_staff=is_staff)
+            profile = user.profile
+            profile.role = 'admin' if is_staff else 'student'
+            profile.save()
+        else:
+            serializer.save()
