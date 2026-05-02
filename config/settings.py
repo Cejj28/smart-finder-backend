@@ -151,10 +151,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
 
-# Tell WhiteNoise to also serve files directly from installed-app static
-# directories (e.g. Django admin CSS/JS). This bypasses the need for
-# collectstatic to have copied every file correctly into STATIC_ROOT.
-WHITENOISE_USE_FINDERS = True
+# The magic fix for missing file references in CSS (prevents crash on missing maps/fonts)
 WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = '/media/'
@@ -169,7 +166,7 @@ if os.environ.get('CLOUDINARY_URL'):
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
     print("INFO: Cloudinary URL found. Using Cloudinary for Media storage.")
@@ -199,4 +196,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
-
