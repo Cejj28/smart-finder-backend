@@ -110,6 +110,8 @@ class ItemViewSet(viewsets.ModelViewSet):
     def matches(self, request, pk=None):
         """
         Smart Match AI Logic:
+        Finds potential matches based on opposite type and same category.
+        """
         item = self.get_object()
         target_type = 'Found' if item.type == 'Lost' else 'Lost'
         
