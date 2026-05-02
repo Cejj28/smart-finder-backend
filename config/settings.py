@@ -155,6 +155,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else 
 # directories (e.g. Django admin CSS/JS). This bypasses the need for
 # collectstatic to have copied every file correctly into STATIC_ROOT.
 WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
