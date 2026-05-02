@@ -75,8 +75,12 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         # All mobile users (including admins) see only Approved items in the public feed
-        # Admins manage pending reports through the web admin panel
-        queryset = self.queryset.filter(status='Approved')
+        # Admins manage pending reports through the web admin panel using ?admin=true
+        if request.user.is_staff and request.query_params.get('admin') == 'true':
+            queryset = self.queryset
+        else:
+            queryset = self.queryset.filter(status='Approved')
+        
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
