@@ -110,23 +110,24 @@ class ItemViewSet(viewsets.ModelViewSet):
     def matches(self, request, pk=None):
         """
         Smart Match AI Logic:
-        Given an item, finds potential matches based on opposite type and same category.
-        """
         item = self.get_object()
-        if not item.category:
-            return Response([]) # No matches if category is unknown
-
-        # Look for the opposite type
         target_type = 'Found' if item.type == 'Lost' else 'Lost'
+        
+        # Base queryset: items of the opposite type that aren't reported by the same person
+        queryset = Item.objects.filter(type=target_type).exclude(reporter=item.reporter)
 
-        # Find items with the same category, opposite type, exclude the user's own items
-        # Optionally, we only match with 'Approved' or 'Pending' items
-        matches = Item.objects.filter(
-            type=target_type,
-            category=item.category
-        ).exclude(reporter=item.reporter).order_by('-created_at')[:5] # Return top 5 matches
+        # 1. Try matching by category if it exists
+        if item.category:
+            queryset = queryset.filter(category=item.category)
+        else:
+            # 2. Fallback: Match by item name (case-insensitive partial match)
+            # This ensures the UI appears during testing even if ML hasn't run
+            queryset = queryset.filter(item_name__icontains=item.item_name[:5])
 
-        serializer = self.get_serializer(matches, many=True)
+        # Exclude the current item just in case (though types should handle it)
+        queryset = queryset.exclude(id=item.id)
+
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 class UserViewSet(viewsets.ModelViewSet):
