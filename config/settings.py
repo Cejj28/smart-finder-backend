@@ -183,7 +183,7 @@ else:
 
 # Ensure your fallback variables match:
 DEFAULT_FILE_STORAGE = STORAGES["default"]["BACKEND"]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 
 CORS_ALLOW_ALL_ORIGINS = True
