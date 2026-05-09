@@ -74,43 +74,53 @@ class Notification(models.Model):
 
 @receiver(post_save, sender=Item)
 def notify_item_changes(sender, instance, created, **kwargs):
-    if created:
-        # Notify admins of new post
-        admins = User.objects.filter(is_staff=True)
-        for admin in admins:
-            Notification.objects.create(
-                user=admin,
-                title="New Item Reported",
-                message=f"A new {instance.type.lower()} item '{instance.item_name}' has been reported and needs review.",
-                target_page="/items"
-            )
-    else:
-        # Notify reporter if status changed
-        Notification.objects.create(
-            user=instance.reporter,
-            title="Post Status Updated",
-            message=f"Your post '{instance.item_name}' has been {instance.status.lower()}.",
-            target_page="/profile"
-        )
+    try:
+        if created:
+            # Notify admins of new post
+            admins = User.objects.filter(is_staff=True)
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    title="New Item Reported",
+                    message=f"A new {instance.type.lower()} item '{instance.item_name}' has been reported and needs review.",
+                    target_page="/items"
+                )
+        else:
+            # Only notify if status changed (heuristic: if not Pending Review anymore)
+            # and avoid notifying if it was just deleted or something similar
+            if instance.status != 'Pending Review':
+                Notification.objects.get_or_create(
+                    user=instance.reporter,
+                    title="Post Status Updated",
+                    message=f"Your post '{instance.item_name}' has been {instance.status.lower()}.",
+                    target_page="/profile",
+                    is_read=False
+                )
+    except Exception as e:
+        print(f"Notification Error: {e}")
 
 @receiver(post_save, sender=Claim)
 def notify_claim_changes(sender, instance, created, **kwargs):
-    if created:
-        # Notify admins of new claim
-        admins = User.objects.filter(is_staff=True)
-        for admin in admins:
-            Notification.objects.create(
-                user=admin,
-                title="New Claim Submitted",
-                message=f"A new claim has been submitted for '{instance.item.item_name}' by {instance.claimant_name}.",
-                target_page="/claims"
-            )
-    else:
-        # Notify user who made the claim if status changed
-        if instance.user:
-            Notification.objects.create(
-                user=instance.user,
-                title="Claim Status Updated",
-                message=f"Your claim for '{instance.item.item_name}' has been {instance.status.lower()}.",
-                target_page="/profile"
-            )
+    try:
+        if created:
+            # Notify admins of new claim
+            admins = User.objects.filter(is_staff=True)
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    title="New Claim Submitted",
+                    message=f"A new claim has been submitted for '{instance.item.item_name}' by {instance.claimant_name}.",
+                    target_page="/claims"
+                )
+        else:
+            # Notify user who made the claim if status changed
+            if instance.user and instance.status != 'Pending':
+                Notification.objects.get_or_create(
+                    user=instance.user,
+                    title="Claim Status Updated",
+                    message=f"Your claim for '{instance.item.item_name}' has been {instance.status.lower()}.",
+                    target_page="/profile",
+                    is_read=False
+                )
+    except Exception as e:
+        print(f"Notification Error: {e}")
