@@ -5,7 +5,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth.models import User
 from .models import Item, Claim, Notification
-from .serializers import ItemSerializer, UserSerializer, StudentRegisterSerializer, ClaimSerializer, NotificationSerializer
+from .serializers import (
+    ItemSerializer, UserSerializer, StudentRegisterSerializer, 
+    ClaimSerializer, NotificationSerializer, UserProfileSerializer, 
+    ChangePasswordSerializer
+)
 
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
@@ -41,6 +45,31 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+class ChangePasswordView(generics.UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+
+        # Check current password
+        if not user.check_password(serializer.data.get("current_password")):
+            return Response({"current_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Set new password
+        user.set_password(serializer.data.get("new_password"))
+        user.save()
+        return Response({"status": "password updated successfully"})
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

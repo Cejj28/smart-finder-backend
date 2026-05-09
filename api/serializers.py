@@ -90,3 +90,38 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = '__all__'
         read_only_fields = ('user', 'created_at')
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source='profile.full_name', allow_blank=True)
+    department = serializers.CharField(source='profile.department', allow_blank=True)
+    role = serializers.CharField(source='profile.role', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'full_name', 'department', 'role', 'is_staff')
+        read_only_fields = ('id', 'username', 'is_staff')
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        
+        # Update User fields
+        instance.email = validated_data.get('email', instance.email)
+        instance.save()
+
+        # Update UserProfile fields
+        profile = instance.profile
+        profile.full_name = profile_data.get('full_name', profile.full_name)
+        profile.department = profile_data.get('department', profile.department)
+        profile.save()
+
+        return instance
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=6)
+    confirm_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "New passwords do not match."})
+        return data

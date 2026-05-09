@@ -1,6 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ItemViewSet, UserViewSet, RegisterView, CustomAuthToken, StudentRegisterView, ClaimViewSet, trigger_migration, NotificationViewSet
+from .views import (
+    ItemViewSet, UserViewSet, RegisterView, CustomAuthToken, 
+    StudentRegisterView, ClaimViewSet, trigger_migration, 
+    NotificationViewSet, ProfileView, ChangePasswordView
+)
 
 router = DefaultRouter()
 router.register(r'items', ItemViewSet)
@@ -14,4 +18,6 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('register/student/', StudentRegisterView.as_view(), name='register-student'),
     path('login/', CustomAuthToken.as_view(), name='login'),
+    path('profile/me/', ProfileView.as_view(), name='profile-me'),
+    path('profile/change-password/', ChangePasswordView.as_view(), name='change-password'),
 ]
