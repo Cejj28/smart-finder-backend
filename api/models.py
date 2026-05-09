@@ -60,3 +60,57 @@ class Claim(models.Model):
 
     def __str__(self):
         return f"Claim by {self.claimant_name} for {self.item.item_name}"
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    target_page = models.CharField(max_length=100) # e.g. /items or /claims
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+@receiver(post_save, sender=Item)
+def notify_item_changes(sender, instance, created, **kwargs):
+    if created:
+        # Notify admins of new post
+        admins = User.objects.filter(is_staff=True)
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                title="New Item Reported",
+                message=f"A new {instance.type.lower()} item '{instance.item_name}' has been reported and needs review.",
+                target_page="/items"
+            )
+    else:
+        # Notify reporter if status changed
+        Notification.objects.create(
+            user=instance.reporter,
+            title="Post Status Updated",
+            message=f"Your post '{instance.item_name}' has been {instance.status.lower()}.",
+            target_page="/profile"
+        )
+
+@receiver(post_save, sender=Claim)
+def notify_claim_changes(sender, instance, created, **kwargs):
+    if created:
+        # Notify admins of new claim
+        admins = User.objects.filter(is_staff=True)
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                title="New Claim Submitted",
+                message=f"A new claim has been submitted for '{instance.item.item_name}' by {instance.claimant_name}.",
+                target_page="/claims"
+            )
+    else:
+        # Notify user who made the claim if status changed
+        if instance.user:
+            Notification.objects.create(
+                user=instance.user,
+                title="Claim Status Updated",
+                message=f"Your claim for '{instance.item.item_name}' has been {instance.status.lower()}.",
+                target_page="/profile"
+            )

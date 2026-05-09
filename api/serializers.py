@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Item, UserProfile, Claim
+from .models import Item, UserProfile, Claim, Notification
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -84,3 +84,9 @@ class ClaimSerializer(serializers.ModelSerializer):
 
     def get_claimant_username(self, obj):
         return obj.user.username if obj.user else None
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        read_only_fields = ('user', 'created_at')
