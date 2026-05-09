@@ -72,9 +72,12 @@ class ItemSerializer(serializers.ModelSerializer):
 
 class ClaimSerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='item.item_name')
-    claimant_username = serializers.ReadOnlyField(source='user.username')
+    claimant_username = serializers.SerializerMethodField()
 
     class Meta:
         model = Claim
         fields = '__all__'
         read_only_fields = ('user', 'created_at')
+
+    def get_claimant_username(self, obj):
+        return obj.user.username if obj.user else None
