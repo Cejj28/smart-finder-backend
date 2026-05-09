@@ -178,3 +178,10 @@ class ClaimViewSet(viewsets.ModelViewSet):
             claimant_name = user.get_full_name() or user.username
         
         serializer.save(user=user, claimant_name=claimant_name)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # If the claim is released, mark the item as released so it hides from public feeds
+        if instance.status == 'Released':
+            instance.item.status = 'Released'
+            instance.item.save()
