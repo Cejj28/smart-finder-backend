@@ -7,6 +7,17 @@ from django.contrib.auth.models import User
 from .models import Item, Claim
 from .serializers import ItemSerializer, UserSerializer, StudentRegisterSerializer, ClaimSerializer
 
+from django.core.management import call_command
+from django.http import JsonResponse
+
+def trigger_migration(request):
+    try:
+        call_command('migrate')
+        return JsonResponse({'status': 'success', 'message': 'Database migrated successfully!'})
+    except Exception as e:
+        import traceback
+        return JsonResponse({'status': 'error', 'message': str(e), 'details': traceback.format_exc()})
+
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
