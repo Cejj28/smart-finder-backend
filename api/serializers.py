@@ -78,6 +78,9 @@ class ClaimSerializer(serializers.ModelSerializer):
         model = Claim
         fields = '__all__'
         read_only_fields = ('user', 'created_at')
+        extra_kwargs = {
+            'claimant_name': {'required': False, 'allow_blank': True}
+        }
 
     def get_claimant_username(self, obj):
         return obj.user.username if obj.user else None
