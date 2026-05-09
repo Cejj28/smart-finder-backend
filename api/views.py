@@ -143,14 +143,20 @@ class ClaimViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
-        # Admins see all claims, users see only their own
-        if request.user.is_staff:
-            queryset = Claim.objects.all().order_by('-created_at')
-        else:
-            queryset = Claim.objects.filter(user=request.user).order_by('-created_at')
-        
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        try:
+            # Admins see all claims, users see only their own
+            if request.user.is_staff:
+                queryset = Claim.objects.all().order_by('-created_at')
+            else:
+                queryset = Claim.objects.filter(user=request.user).order_by('-created_at')
+            
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            print(error_details)
+            return Response({'error': str(e), 'details': error_details}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def perform_create(self, serializer):
         # If the user is authenticated, link the claim to them.
