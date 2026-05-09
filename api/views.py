@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth.models import User
-from .models import Item
-from .serializers import ItemSerializer, UserSerializer, StudentRegisterSerializer
+from .models import Item, Claim
+from .serializers import ItemSerializer, UserSerializer, StudentRegisterSerializer, ClaimSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -136,3 +136,28 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
+
+class ClaimViewSet(viewsets.ModelViewSet):
+    queryset = Claim.objects.all().order_by('-created_at')
+    serializer_class = ClaimSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        # Admins see all claims, users see only their own
+        if request.user.is_staff:
+            queryset = Claim.objects.all().order_by('-created_at')
+        else:
+            queryset = Claim.objects.filter(user=request.user).order_by('-created_at')
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        # If the user is authenticated, link the claim to them.
+        # If the claimant_name is empty, use the user's full name or username.
+        user = self.request.user
+        claimant_name = self.request.data.get('claimant_name')
+        if not claimant_name and user.is_authenticated:
+            claimant_name = user.get_full_name() or user.username
+        
+        serializer.save(user=user, claimant_name=claimant_name)

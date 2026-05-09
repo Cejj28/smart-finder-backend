@@ -40,3 +40,23 @@ class Item(models.Model):
 
     def __str__(self):
         return f"{self.type}: {self.item_name}"
+
+class Claim(models.Model):
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+        ('Released', 'Released'),
+    )
+    
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='claims')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='claims', null=True, blank=True)
+    claimant_name = models.CharField(max_length=255)
+    proof = models.TextField()
+    contact_info = models.CharField(max_length=255)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    release_date = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Claim by {self.claimant_name} for {self.item.item_name}"

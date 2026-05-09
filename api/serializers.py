@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Item, UserProfile
+from .models import Item, UserProfile, Claim
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -69,3 +69,12 @@ class ItemSerializer(serializers.ModelSerializer):
         model = Item
         fields = '__all__'
         read_only_fields = ('reporter', 'created_at')
+
+class ClaimSerializer(serializers.ModelSerializer):
+    item_name = serializers.ReadOnlyField(source='item.item_name')
+    claimant_username = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = Claim
+        fields = '__all__'
+        read_only_fields = ('user', 'created_at')
