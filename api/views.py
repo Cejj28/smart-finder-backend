@@ -174,8 +174,11 @@ class ItemViewSet(viewsets.ModelViewSet):
         item = self.get_object()
         target_type = 'Found' if item.type == 'Lost' else 'Lost'
         
-        # Base queryset: items of the opposite type that aren't reported by the same person
-        queryset = Item.objects.filter(type=target_type).exclude(reporter=item.reporter)
+        # Base queryset: items of the opposite type, approved/visible, and not yet released
+        queryset = Item.objects.filter(
+            type=target_type,
+            status='Approved'
+        ).exclude(reporter=item.reporter)
 
         # 1. Try matching by category if it exists
         if item.category:
